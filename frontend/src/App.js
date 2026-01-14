@@ -378,7 +378,7 @@ function App() {
     console.log("Submitting Data:", { userInfo, responses });
 
     try {
-      // NOTE: Ensure this URL matches your deployed Variant B backend
+      // NOTE: Ensure this URL matches your deployed Variant B backend hehe
       const response = await fetch('https://sjt-backend-b.onrender.com/api/submit', {
         method: 'POST',
         headers: {

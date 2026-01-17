@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 import {
   Container, Box, Typography, TextField, Button, 
-  Paper, LinearProgress, Alert, MenuItem, Grid, Divider,
-  FormControl, InputLabel, Select
+  Paper, LinearProgress, Alert, Divider,
+  Radio, RadioGroup, FormControlLabel, FormControl
 } from '@mui/material';
 import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/styles';
 
@@ -14,56 +14,28 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LanguageIcon from '@mui/icons-material/Language';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import WarningIcon from '@mui/icons-material/Warning';
 
 import logo from './logo.png'; 
 
 // --- THEME CONFIGURATION ---
 let theme = createTheme({
   palette: {
-    primary: {
-      main: '#F57C00', // Orange
-      light: 'rgba(245, 124, 0, 0.1)',
-    },
-    secondary: {
-      main: '#B31B1B', // Red
-    },
-    text: {
-      primary: '#2c3e50',
-      secondary: '#34495e',
-    },
-    background: {
-      default: '#f8f9fa',
-      paper: '#FFFFFF',
-    },
+    primary: { main: '#F57C00', light: 'rgba(245, 124, 0, 0.1)' },
+    secondary: { main: '#B31B1B' },
+    text: { primary: '#2c3e50', secondary: '#34495e' },
+    background: { default: '#f8f9fa', paper: '#FFFFFF' },
   },
   typography: {
     fontFamily: 'sans-serif',
-    h1: {
-      fontWeight: 700,
-      color: '#B31B1B',
-      textAlign: 'center',
-      fontSize: '2.2rem',
-    },
-    h2: {
-      fontWeight: 600,
-      color: '#B31B1B',
-      textAlign: 'center',
-      marginBottom: '1rem',
-      fontSize: '1.5rem',
-    },
-    body1: {
-      fontSize: '1rem',
-      lineHeight: 1.6,
-    }
+    h1: { fontWeight: 700, color: '#B31B1B', textAlign: 'center', fontSize: '2.2rem' },
+    h2: { fontWeight: 600, color: '#B31B1B', textAlign: 'center', marginBottom: '1rem', fontSize: '1.5rem' },
+    body1: { fontSize: '1rem', lineHeight: 1.6 }
   },
   components: {
     MuiButton: {
       styleOverrides: {
-        root: {
-          borderRadius: 8,
-          textTransform: 'none',
-          fontWeight: 600,
-        }
+        root: { borderRadius: 8, textTransform: 'none', fontWeight: 600 }
       }
     }
   }
@@ -111,9 +83,9 @@ const questionsB = [
     ur: "سوال 3: ایک کسٹمر بکنگ کرنے پر اصولی طور پر رضامند ہے، مگر بکنگ رقم دینے سے پہلے ”رات بھر سوچنا“ چاہتا ہے۔ وہ یہ بھی کہتا ہے کہ زیادہ فالو اَپ نہ کریں۔",
     options: [
       { key: 'A', en: "You call once later that night to confirm, since booking intent is highest now.", ur: "آپ اسی رات ایک بار کال کر کے کنفرم کرنے کی کوشش کرتے ہیں کیونکہ اسی وقت بکنگ کی نیت سب سے مضبوط ہوتی ہے۔" },
-      { key: 'B', en: "You send one message in the evening and one in the morning to keep momentum without “too much” follow-up.", ur: "آپ شام میں ایک پیغام اور صبح ایک پیغام بھیجتے ہیں تاکہ رفتار برقرار رہے مگر ”زیادہ“ فالو اَپ بھی نہ ہو۔" },
-      { key: 'C', en: "You agree, summarize the decision points, and set one specific follow-up time they choose.", ur: "آپ رضامندی ظاہر کرتے ہیں، فیصلہ کرنے کے نکات سمیٹتے ہیں، اور ان ہی کے منتخب کردہ ایک مخصوص وقت پر فالو اَپ طے کر لیتے ہیں۔" },
-      { key: 'D', en: "You don’t follow up at all until they contact you, to respect their request.", ur: "آپ بالکل فالو اَپ نہیں کرتے اور صرف ان کے رابطہ کرنے کا انتظار کرتے ہیں تاکہ ان کی بات کی مکمل پاسداری ہو۔" }
+      { key: 'B', en: "You send one message in the evening and one in the morning to keep momentum without “too much” follow-up.", ur: "آپ رفتار برقرار رکھنے کے لیے شام میں ایک پیغام اور صبح میں ایک پیغام بھیجتے ہیں، لیکن ”زیادہ“ فالو اَپ کے بغیر۔" },
+      { key: 'C', en: "You agree, summarize the decision points, and set one specific follow-up time they choose.", ur: "آپ اتفاق کرتے ہیں، فیصلے کے اہم نکات کا خلاصہ کرتے ہیں، اور ان کی پسند کے مطابق ایک مخصوص فالو اَپ وقت طے کر لیتے ہیں۔" },
+      { key: 'D', en: "You don’t follow up at all until they contact you, to respect their request.", ur: "آپ ان کی درخواست کا احترام کرتے ہوئے بالکل فالو اَپ نہیں کرتے، جب تک وہ خود آپ سے رابطہ نہ کریں۔" }
     ]
   },
   {
@@ -121,10 +93,10 @@ const questionsB = [
     en: "Q4. Your dealership receives a sudden instruction from DSM to prioritize a specific model mix this month. Your team feels it will hurt customer experience.",
     ur: "سوال 4: آپ کی ڈیلرشپ کو ڈی ایس ایم کی طرف سے اچانک ہدایت ملتی ہے کہ اس ماہ ایک مخصوص ماڈل مکس کو ترجیح دی جائے۔ آپ کی ٹیم کو لگتا ہے اس سے کسٹمر ایکسپیرینس متاثر ہوگا۔",
     options: [
-      { key: 'A', en: "You align on the directive, but translate it into customer-friendly behaviors and tracking, then review weekly for course-correction.", ur: "آپ ہدایت کو سامنے رکھتے ہوئے اسے کسٹمر فرینڈلی روّیوں/اسکرپٹس اور ٹریکنگ میں تبدیل کرتے ہیں، اور ہفتہ وار جائزہ لے کر اصلاح کرتے رہتے ہیں۔" },
-      { key: 'B', en: "You push back strongly to DSM and delay execution until you get flexibility.", ur: "آپ سختی سے واپس مؤقف رکھتے ہیں اور لچک ملنے تک عمل درآمد مؤخر کر دیتے ہیں۔" },
-      { key: 'C', en: "You let each consultant decide how to balance it individually.", ur: "آپ ہر سیلز کنسلٹنٹ کو اپنی سمجھ کے مطابق توازن رکھنے دیتے ہیں، بغیر کسی واضح یکساں طریقے کے۔" },
-      { key: 'D', en: "You tell the team to follow it as-is and focus on numbers.", ur: "آپ ٹیم کو کہتے ہیں کہ ہدایت جیسے کی تیسی فالو کریں اور صرف نمبرز پر فوکس رکھیں۔" }
+      { key: 'A', en: "You align on the directive, but translate it into customer-friendly behaviors and tracking, then review weekly for course-correction.", ur: "آپ ہدایت پر اتفاق کرتے ہیں، لیکن اسے کسٹمر کے لیے موزوں رویوں اور ٹریکنگ میں تبدیل کرتے ہیں، پھر ہفتہ وار جائزہ لے کر ضرورت کے مطابق اصلاح کرتے ہیں۔" },
+      { key: 'B', en: "You push back strongly to DSM and delay execution until you get flexibility.", ur: "آپ DSM کے سامنے سختی سے اعتراض کرتے ہیں اور لچک ملنے تک عمل درآمد میں تاخیر کرتے ہیں۔" },
+      { key: 'C', en: "You let each consultant decide how to balance it individually.", ur: "آپ ہر کنسلٹنٹ کو خود فیصلہ کرنے دیتے ہیں کہ وہ اسے کس طرح متوازن رکھے۔" },
+      { key: 'D', en: "You tell the team to follow it as-is and focus on numbers.", ur: "آپ ٹیم کو کہتے ہیں کہ ہدایت پر جوں کا توں عمل کریں اور صرف نمبرز پر توجہ دیں۔" }
     ]
   },
   {
@@ -165,32 +137,32 @@ const questionsB = [
     en: "Q8. It’s month-end, the dealership is busy, and you’ve had a tense interaction with a customer who accused your team of misleading them on delivery timelines. Right after that, a new walk-in customer arrives and says they were referred by a VIP client and expects “priority treatment.” Your team is watching your reaction.",
     ur: "سوال 8: مہینے کے اختتام پر ڈیلرشپ بہت مصروف ہے اور ابھی ایک کسٹمر نے آپ کی ٹیم پر ڈیلیوری ٹائم لائن کے حوالے سے غلط رہنمائی کا الزام لگایا ہے۔ اسی کے فوراً بعد ایک نیا واک اِن آتا ہے جو کہتا ہے اسے وی آئی پی ریفرنس ملا ہے اور وہ ”پرائرٹی ٹریٹمنٹ“ چاہتا ہے۔ ٹیم آپ کے ردِعمل کو دیکھ رہی ہے۔",
     options: [
-      { key: 'A', en: "You ask a senior consultant to handle the new customer because you’re not in the right headspace, and you step away to cool off.", ur: "آپ کسی سینئر کنسلٹنٹ کو ہینڈل کرنے دیتے ہیں کیونکہ آپ ذہنی طور پر ٹھیک حالت میں نہیں، اور خود کچھ دیر کے لیے ہٹ جاتے ہیں۔" },
-      { key: 'B', en: "You immediately engage the new customer with high energy to recover the situation, even if your tone feels slightly forced.", ur: "آپ فوراً بہت ہائی انرجی کے ساتھ نئے کسٹمر کو ہینڈل کرتے ہیں تاکہ ماحول سنبھل جائے، چاہے یہ مصنوعی لگے۔" },
-      { key: 'C', en: "You take a brief moment to reset, delegate the immediate tasks calmly, and engage the new customer with steady professionalism.", ur: "آپ کچھ لمحے خود کو ری سیٹ کرتے ہیں، کام پرسکون انداز میں تقسیم کرتے ہیں، اور نئے کسٹمر کو متوازن پروفیشنل انداز میں ہینڈل کرتے ہیں۔" },
-      { key: 'D', en: "You vent your frustration to your team about the earlier customer, then move on to the VIP referral with urgency.", ur: "آپ پہلے ٹیم کے ساتھ جھنجھالہٹ کا اظہار کرتے ہیں، پھر وی آئی پی ریفرنس کی طرف تیزی سے بڑھ جاتے ہیں۔" }
+      { key: 'A', en: "You ask a senior consultant to handle the new customer because you’re not in the right headspace, and you step away to cool off.", ur: "آپ ایک سینئر کنسلٹنٹ سے کہتے ہیں کہ وہ نئے کسٹمر کو ہینڈل کرے کیونکہ اس وقت آپ ذہنی طور پر درست حالت میں نہیں ہیں، اور آپ خود کچھ دیر کے لیے الگ ہو کر پرسکون ہو جاتے ہیں۔" },
+      { key: 'B', en: "You immediately engage the new customer with high energy to recover the situation, even if your tone feels slightly forced.", ur: "آپ فوراً بھرپور توانائی کے ساتھ نئے کسٹمر سے ڈیل کرتے ہیں تاکہ صورتحال سنبھل جائے، چاہے آپ کا لہجہ کچھ مصنوعی ازبردستی سا لگے۔" },
+      { key: 'C', en: "You take a brief moment to reset, delegate the immediate tasks calmly, and engage the new customer with steady professionalism.", ur: "آپ چند لمحے لے کر خود کو ری سیٹ کرتے ہیں، فوری کام ُپرسکون انداز میں ڈیلیگیٹ کرتے ہیں، اور پھر نئے کسٹمر سے متوازن پروفیشنل انداز میں بات کرتے ہیں۔" },
+      { key: 'D', en: "You vent your frustration to your team about the earlier customer, then move on to the VIP referral with urgency.", ur: "آپ پہلے والے کسٹمر پر اپنی جھنجھلاہٹ ٹیم کے سامنے نکالتے ہیں، پھر VIP ریفرل والے کسٹمر کی طرف جلدی اور ہنگامی انداز میں بڑھتے ہیں۔" }
     ]
   },
   {
     id: 9,
     en: "Q9. Your dealership is particularly busy today, with several walk-in customers. A customer enters quietly, takes their time, and looks around without approaching anyone. You are in the middle of dealing with other customers.",
-    ur: "سوال 9: آج آپ کی ڈیلرشپ خاصی مصروف ہے اور کئی واک اِن کسٹمرز موجود ہیں۔ ایک کسٹمر خاموشی سے آتا ہے، ادھر اُدھر دیکھتا ہے مگر کسی سے بات نہیں کرتا۔ آپ اس وقت دوسرے کسٹمرز کے ساتھ مصروف ہیں۔",
+    ur: "سوال 9: آج آپ کی ڈیلرشپ خاصی مصروف ہے اور کئی واک اِن کسٹمرز موجود ہیں۔ ایک کسٹمر خاموشی سے داخل ہوتا ہے، آہستہ آہستہ دیکھتا ہے، اور کسی کے پاس آئے بغیر ارد گرد گھومتا رہتا ہے۔ آپ اس وقت دوسرے کسٹمرز کے ساتھ مصروف ہیں۔",
     options: [
-      { key: 'A', en: "You acknowledge the customer’s presence with a warm greeting from a distance and wait for a moment to see if they need help, ensuring they don’t feel ignored.", ur: "آپ دور سے مسکرا کر مختصر سلام/اشارہ کرتے ہیں تاکہ وہ نظر انداز محسوس نہ کریں، پھر موقع ملتے ہی مختصر ضرورت جانچنے والا سوال کر کے شامل ہوتے ہیں۔" },
-      { key: 'B', en: "You ignore the customer for now, believing that they will understand you are busy and that you will approach them once you are available.", ur: "آپ انہیں کہتے ہیں کچھ دیر انتظار کریں، پھر فارغ ہو کر واپس آتے ہیں۔" },
-      { key: 'C', en: "You politely ask the customer to wait for a few minutes while you finish up with the other customers, offering them something to look at in the meantime.", ur: "آپ موجودہ کسٹمرز پر فوکس رکھتے ہیں اور سمجھتے ہیں وہ خود رابطہ کر لیں گے۔" },
-      { key: 'D', en: "You continue focusing on the immediate customers, assuming that this customer will approach you when they’re ready, and don’t engage further.", ur: "آپ مکمل طور پر تب تک نظر انداز کرتے ہیں جب تک آپ بالکل فری نہ ہو جائیں۔" }
+      { key: 'A', en: "You acknowledge the customer’s presence with a warm greeting from a distance and wait for a moment to see if they need help, ensuring they don’t feel ignored.", ur: "آپ دور سے گرمجوشی کے ساتھ سلام کرتے ہیں اور تھوڑی دیر دیکھتے ہیں کہ کیا انہیں مدد چاہیے، تاکہ انہیں نظر انداز ہونے کا احساس نہ ہو۔" },
+      { key: 'B', en: "You ignore the customer for now, believing that they will understand you are busy and that you will approach them once you are available.", ur: "آپ فی الحال انہیں نظر انداز کرتے ہیں، یہ سمجھتے ہوئے کہ وہ جانتے ہیں آپ مصروف ہیں اور فارغ ہوتے ہی آپ ان کے پاس آجائیں گے۔" },
+      { key: 'C', en: "You politely ask the customer to wait for a few minutes while you finish up with the other customers, offering them something to look at in the meantime.", ur: "آپ مؤدبانہ طور پر کہتے ہیں کہ چند منٹ انتظار کر لیں جب تک آپ دوسرے کسٹمرز سے فارغ ہو جائیں، اور اس دوران دیکھنے کے لیے کچھ چیز/بروشر وغیرہ دے دیتے ہیں۔" },
+      { key: 'D', en: "You continue focusing on the immediate customers, assuming that this customer will approach you when they’re ready, and don’t engage further.", ur: "آپ فوری کسٹمرز پر ہی توجہ رکھے رہتے ہیں، یہ سمجھتے ہوئے کہ جب وہ تیار ہوں گے تو خود آپ کے پاس آجائیں گے، اور مزید رابطہ نہیں کرتے۔" }
     ]
   },
   {
     id: 10,
     en: "Q10. A customer’s spouse is skeptical and keeps whispering that “Suzuki isn’t premium.” The main buyer stays polite but becomes quieter.",
-    ur: "سوال 10: ایک کسٹمر کے شریکِ حیات بار بار سرگوشی کرتا ہے کہ ”سوزوکی پریمیئم نہیں ہے۔“ مرکزی خریدار شائستہ رہتا ہے مگر آہستہ آہستہ خاموش ہوتا جا رہا ہے۔",
+    ur: "سوال 10: کسٹمر کے شریک حیات (اسپاؤس) کو شک ہے اور وہ بار بار دھیرے سے کہہ رہے ہیں کہ ”Suzuki پریمیئم نہیں ہے۔“ اصل خریدار (مین بائر) بدستور مؤدب رہتا ہے مگر خاموش/کم بولنے لگتا ہے۔",
     options: [
-      { key: 'A', en: "You offer a comparison with competitors, emphasizing where your car is stronger.", ur: "آپ مقابل برانڈز سے براہِ راست موازنہ کر کے اپنی گاڑی کی برتری دکھاتے ہیں۔" },
-      { key: 'B', en: "You acknowledge both perspectives, ask what “premium” means to them, and reframe the discussion around their specific standards.", ur: "آپ دونوں کے نقطۂ نظر کو تسلیم کرتے ہیں، پوچھتے ہیں کہ ان کے لیے ”پریمیئم“ کا مطلب کیا ہے، اور گفتگو کو ان کے معیار اور ضروریات کے مطابق فریم کرتے ہیں۔" },
-      { key: 'C', en: "You respond by listing premium features quickly to counter the perception.", ur: "آپ فوراً پریمیئم فیچرز کی فہرست سنا کر اس تاثر کو توڑنے کی کوشش کرتے ہیں۔" },
-      { key: 'D', en: "You focus only on the main buyer to avoid turning it into a debate with the spouse.", ur: "آپ صرف مرکزی خریدار پر فوکس کرتے ہیں تاکہ بات بحث میں نہ بدل جائے۔" }
+      { key: 'A', en: "You offer a comparison with competitors, emphasizing where your car is stronger.", ur: "آپ مقابل برانڈز کے ساتھ تقابل پیش کرتے ہیں اور بتاتے ہیں کہ آپ کی گاڑی کن پہلوؤں میں زیادہ مضبوط ہے۔" },
+      { key: 'B', en: "You acknowledge both perspectives, ask what “premium” means to them, and reframe the discussion around their specific standards.", ur: "آپ دونوں کے نقطہ نظر کو تسلیم کرتے ہیں، پوچھتے ہیں کہ ان کے لیے ”پریمیئم“ کا مطلب کیا ہے، اور گفتگو کو ان کے مخصوص معیار کے مطابق دوبارہ فریم کرتے ہیں۔" },
+      { key: 'C', en: "You respond by listing premium features quickly to counter the perception.", ur: "آپ تاثر کا توڑ کرنے کے لیے تیزی سے پریمیئم فیچرز کی فہرست گنوا دیتے ہیں۔" },
+      { key: 'D', en: "You focus only on the main buyer to avoid turning it into a debate with the spouse.", ur: "آپ بحث سے بچنے کے لیے صرف اصل خریدار پر فوکس کرتے ہیں اور شریک حیات کو شامل نہیں کرتے۔" }
     ]
   },
   {
@@ -237,7 +209,7 @@ const questionsB = [
 ];
 
 function App() {
-  const [step, setStep] = useState('welcome'); // welcome, lang, assessment, paper, results
+  const [step, setStep] = useState('welcome'); 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userInfo, setUserInfo] = useState({
     name: '',
@@ -320,49 +292,37 @@ function App() {
     setStep('assessment');
   };
 
-  // --- SCORE HANDLER (ENFORCES UNIQUE SCORES) ---
-  const handleScoreChange = (qId, optionKey, newScore) => {
-    setResponses(prev => {
-      const currentQ = prev[qId] || {};
-      const updatedQ = { ...currentQ, [optionKey]: newScore };
-
-      // Check for duplicates and clear the old one
-      Object.keys(updatedQ).forEach(key => {
-        if (key !== optionKey && updatedQ[key] === newScore) {
-          updatedQ[key] = ''; // Clear the duplicate
-        }
-      });
-
-      return { ...prev, [qId]: updatedQ };
-    });
+  // --- MCQ SELECTION HANDLER ---
+  const handleOptionSelect = (qId, optionKey) => {
+    setResponses(prev => ({ ...prev, [qId]: optionKey }));
+    setError('');
   };
 
-  const validateCurrentQuestion = () => {
-    const q = questionsB[currentQuestionIndex];
-    // For MCQs, ensure all 4 options have a score
-    const currentScores = responses[q.id] || {};
-    const values = ['A', 'B', 'C', 'D'].map(key => currentScores[key]);
-    
-    // Check if all are filled
-    const allFilled = values.every(v => v);
-    
-    // Check if unique (Set removes duplicates)
-    const uniqueValues = new Set(values);
-    
-    return allFilled && uniqueValues.size === 4;
+  // --- TEXT INPUT HANDLER (Q13-15) ---
+  const handleTextChange = (qId, text) => {
+    setResponses(prev => ({ ...prev, [qId]: text }));
+  };
+
+  const countWords = (str) => {
+    if (!str) return 0;
+    return str.trim().split(/\s+/).length;
   };
 
   const handleNext = () => {
-    if (validateCurrentQuestion()) {
-      setError('');
-      // If we are at Q12 (index 11), go to Paper Section
-      if (currentQuestionIndex === 11) {
-        setStep('paper');
-      } else {
-        setCurrentQuestionIndex(prev => prev + 1);
-      }
+    const q = questionsB[currentQuestionIndex];
+    
+    // Validation for MCQs
+    if (!responses[q.id]) {
+      setError(lang === 'en' ? 'Please select an option.' : 'براہ کرم ایک آپشن منتخب کریں۔');
+      return;
+    }
+
+    setError('');
+    // If we are at Q12 (index 11), go to Paper Section
+    if (currentQuestionIndex === 11) {
+      setStep('paper');
     } else {
-      setError(lang === 'en' ? 'Please assign a unique score (1-4) to each option.' : 'براہ کرم ہر آپشن کو ایک منفرد اسکور (1-4) دیں۔');
+      setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
@@ -374,11 +334,23 @@ function App() {
   };
 
   const handleSubmit = async () => {
+    // Validate Word Counts before submitting
+    const paperQuestions = questionsB.slice(12, 15);
+    for (let q of paperQuestions) {
+      const answer = responses[q.id] || '';
+      if (countWords(answer) > 100) {
+        setError(lang === 'en' 
+          ? `Question ${q.id} exceeds the 100-word limit.` 
+          : `سوال ${q.id} 100 الفاظ کی حد سے زیادہ ہے۔`);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     console.log("Submitting Data:", { userInfo, responses });
 
     try {
-      // NOTE: Ensure this URL matches your deployed Variant B backend hehe
+      // Ensure this URL matches your deployed Variant B backend
       const response = await fetch('https://sjt-backend-b.onrender.com/api/submit', {
         method: 'POST',
         headers: {
@@ -448,7 +420,7 @@ function App() {
 
   const renderAssessment = () => {
     const q = questionsB[currentQuestionIndex];
-    const progress = ((currentQuestionIndex) / 12) * 100; // Progress based on 12 MCQs
+    const progress = ((currentQuestionIndex) / 12) * 100; 
 
     return (
       <Paper sx={containerStyles} dir={lang === 'ur' ? 'rtl' : 'ltr'}>
@@ -467,37 +439,48 @@ function App() {
           <Box>
             <Alert severity="info" sx={{ mb: 3 }}>
               {lang === 'en' 
-                ? "Rate EACH option from 1 (Most Effective) to 4 (Least Effective)." 
-                : "ہر آپشن کو 1 (سب سے زیادہ مؤثر) سے 4 (سب سے کم مؤثر) تک درجہ دیں۔"}
+                ? "Select the MOST effective option." 
+                : "سب سے زیادہ مؤثر آپشن منتخب کریں۔"}
             </Alert>
             
-            {q.options.map((opt) => (
-              <Paper key={opt.key} elevation={0} sx={{ p: 2, mb: 2, border: '1px solid #eee', borderRadius: 2, backgroundColor: '#fafafa' }}>
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={8}>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      <span style={{ color: '#F57C00', fontWeight: 'bold', marginRight: 8, marginLeft: 8 }}>{opt.key}.</span> 
-                      {lang === 'en' ? opt.en : opt.ur}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <FormControl fullWidth size="small" sx={{ backgroundColor: 'white', minWidth: '140px' }}>
-                      <InputLabel>{lang === 'en' ? "Score" : "اسکور"}</InputLabel>
-                      <Select
-                        value={responses[q.id]?.[opt.key] || ''}
-                        label={lang === 'en' ? "Score" : "اسکور"}
-                        onChange={(e) => handleScoreChange(q.id, opt.key, e.target.value)}
-                      >
-                        <MenuItem value={1}>1 - Best</MenuItem>
-                        <MenuItem value={2}>2</MenuItem>
-                        <MenuItem value={3}>3</MenuItem>
-                        <MenuItem value={4}>4 - Worst</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-              </Paper>
-            ))}
+            <FormControl component="fieldset" sx={{ width: '100%' }}>
+              <RadioGroup
+                value={responses[q.id] || ''}
+                onChange={(e) => handleOptionSelect(q.id, e.target.value)}
+              >
+                {q.options.map((opt) => {
+                  const isSelected = responses[q.id] === opt.key;
+                  return (
+                    <Paper 
+                      key={opt.key} 
+                      elevation={isSelected ? 3 : 0}
+                      sx={{ 
+                        p: 2, 
+                        mb: 2, 
+                        border: isSelected ? '2px solid #F57C00' : '1px solid #eee', 
+                        borderRadius: 2, 
+                        backgroundColor: isSelected ? '#fff3e0' : '#fafafa',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onClick={() => handleOptionSelect(q.id, opt.key)}
+                    >
+                      <FormControlLabel
+                        value={opt.key}
+                        control={<Radio />}
+                        label={
+                          <Typography variant="body1" sx={{ fontWeight: isSelected ? 600 : 400 }}>
+                            <span style={{ color: '#F57C00', fontWeight: 'bold', marginRight: 8, marginLeft: 8 }}>{opt.key}.</span> 
+                            {lang === 'en' ? opt.en : opt.ur}
+                          </Typography>
+                        }
+                        sx={{ width: '100%', margin: 0, alignItems: 'flex-start', '& .MuiRadio-root': { mt: -0.5 } }}
+                      />
+                    </Paper>
+                  );
+                })}
+              </RadioGroup>
+            </FormControl>
           </Box>
         </Box>
 
@@ -526,9 +509,7 @@ function App() {
     );
   };
 
-  // --- NEW: RENDER PAPER SECTION (Q13-15) ---
   const renderPaperSection = () => {
-    // Get Q13, Q14, Q15
     const paperQuestions = questionsB.slice(12, 15);
 
     return (
@@ -540,23 +521,54 @@ function App() {
           </Typography>
           <Typography variant="body1" color="text.secondary">
             {lang === 'en' 
-              ? "Please write the answers to the following questions on your answer sheet." 
-              : "براہ کرم درج ذیل سوالات کے جوابات اپنی جوابی شیٹ پر لکھیں۔"}
+              ? "Please answer the following questions." 
+              : "براہ کرم درج ذیل سوالات کے جوابات دیں۔"}
           </Typography>
         </Box>
 
         <Divider sx={{ mb: 4 }} />
 
-        {paperQuestions.map((q) => (
-          <Box key={q.id} sx={{ mb: 4, p: 2, backgroundColor: '#f9f9f9', borderRadius: 2, border: '1px solid #eee' }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
-              {lang === 'en' ? `Question ${q.id}` : `سوال ${q.id}`}
-            </Typography>
-            <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
-              {lang === 'en' ? q.en : q.ur}
-            </Typography>
-          </Box>
-        ))}
+        {paperQuestions.map((q) => {
+          const currentText = responses[q.id] || '';
+          const wordCount = countWords(currentText);
+          const isOverLimit = wordCount > 100;
+
+          return (
+            <Box key={q.id} sx={{ mb: 5 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
+                {lang === 'en' ? `Question ${q.id}` : `سوال ${q.id}`}
+              </Typography>
+              <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.6, mb: 2 }}>
+                {lang === 'en' ? q.en : q.ur}
+              </Typography>
+              
+              <TextField
+                fullWidth
+                multiline
+                minRows={4}
+                variant="outlined"
+                placeholder={lang === 'en' ? "Type your answer here..." : "اپنا جواب یہاں لکھیں..."}
+                value={currentText}
+                onChange={(e) => handleTextChange(q.id, e.target.value)}
+                error={isOverLimit}
+                helperText={
+                  <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                    <span>
+                      {isOverLimit 
+                        ? (lang === 'en' ? "Word limit exceeded!" : "الفاظ کی حد سے تجاوز!") 
+                        : (lang === 'en' ? "Max 100 words." : "زیادہ سے زیادہ 100 الفاظ۔")}
+                    </span>
+                    <span style={{ color: isOverLimit ? 'red' : 'inherit' }}>
+                      {wordCount} / 100
+                    </span>
+                  </Box>
+                }
+              />
+            </Box>
+          );
+        })}
+
+        {error && <Alert severity="error" sx={{ mb: 3 }} icon={<WarningIcon />}>{error}</Alert>}
 
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Button 

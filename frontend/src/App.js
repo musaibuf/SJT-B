@@ -334,11 +334,23 @@ function App() {
   };
 
   const handleSubmit = async () => {
-    // Validate Word Counts before submitting
+    // Validate Word Counts and Compulsory Answers before submitting
     const paperQuestions = questionsB.slice(12, 15);
+    
     for (let q of paperQuestions) {
       const answer = responses[q.id] || '';
-      if (countWords(answer) > 100) {
+      const wordCount = countWords(answer);
+
+      // 1. Check if empty (Compulsory)
+      if (!answer.trim()) {
+        setError(lang === 'en' 
+          ? `Question ${q.id} is required.` 
+          : `سوال ${q.id} لازمی ہے۔`);
+        return;
+      }
+
+      // 2. Check word limit (Hard limit)
+      if (wordCount > 100) {
         setError(lang === 'en' 
           ? `Question ${q.id} exceeds the 100-word limit.` 
           : `سوال ${q.id} 100 الفاظ کی حد سے زیادہ ہے۔`);
@@ -545,8 +557,10 @@ function App() {
               <TextField
                 fullWidth
                 multiline
+                required
                 minRows={4}
                 variant="outlined"
+                label={lang === 'en' ? "Required" : "لازمی"}
                 placeholder={lang === 'en' ? "Type your answer here..." : "اپنا جواب یہاں لکھیں..."}
                 value={currentText}
                 onChange={(e) => handleTextChange(q.id, e.target.value)}
